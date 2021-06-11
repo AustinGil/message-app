@@ -5,16 +5,16 @@ async function updateAppList() {
 
   const results = await http.get('/api/application')
 
-  const list = results._embedded.applications.map(app => {
+  const list = results.data.data._embedded.applications.map(app => {
     const { id, name } = app
     return `<li>
-      <form data-form="editApp" action="/api/application/${id}/put" method="POST">
-        <label>Name</label>
-        <input id="edit-${id}" value="${name}">
+      <form data-event="editApp" action="/api/application/${id}/put" method="POST">
+        <label for="new-name-${id}">Name</label>
+        <input id="new-name-${id}" name="name" value="${name}">
         <button type="submit">Edit</button>
       </form>
 
-      <form data-form="deleteApp" action="/api/application/${id}/delete" method="POST">
+      <form data-event="deleteApp" action="/api/application/${id}/delete" method="POST">
         <button type="submit">Delete</button>
       </form>
     </li>`
@@ -22,7 +22,7 @@ async function updateAppList() {
 
   let html = '<p>No items</p>'
   if (list.length) {
-    html = `<ul>${list}</ul>`
+    html = `<ul>${list.join('')}</ul>`
   }
 
   $('#applicationList').innerHTML = html
@@ -30,10 +30,9 @@ async function updateAppList() {
 
 window.addEventListener('submit', async (event) => {
   try {
-    let results
     switch(event.target.dataset.event) {
       case 'getBalance':
-        results = await submitFormEvent(event)
+        const results = await submitFormEvent(event)
         event.target.insertAdjacentHTML('beforeend', `<p>Account balance: € ${results.data.data.value}</p>`)
         event.target.reset()
         break;
@@ -43,15 +42,15 @@ window.addEventListener('submit', async (event) => {
         updateAppList()
         break;
 
+      case 'createApp':
       case 'editApp':
-        results = await submitFormEvent(event)
-        console.log(results)
-        updateAppList()
-        break;
-
       case 'deleteApp':
         await submitFormEvent(event)
         updateAppList()
+        break;
+
+      case 'sendMessage':
+        await submitFormEvent(event)
         break;
     }
   } catch(error) {

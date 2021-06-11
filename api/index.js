@@ -1,6 +1,8 @@
 import express from 'express';
-import { VONAGE_API_KEY, VONAGE_API_SECRET, VONAGE_JWT } from '../config.js'
+import { VONAGE_API_KEY, VONAGE_API_SECRET } from '../config.js'
 import { wrapAsync, toBase64, http } from './utils.js'
+
+const AUTH_TOKEN = toBase64(`${VONAGE_API_KEY}:${VONAGE_API_SECRET}`)
 
 const router = express.Router()
 
@@ -14,83 +16,53 @@ router.get('/api/balance', wrapAsync(async () => {
   return results
 }))
 
-router.post('/api/application', wrapAsync(async () => {
+router.post('/api/application', wrapAsync(async (request) => {
   const { name } = request.body
+
+  if (!name) throw new Error('name is required')
+
   const results = await http.post('https://api.nexmo.com/v2/applications', {
     headers: {
-      Authorization: `Bearer MzYyOTkzMjM6NWs5WjA2SW9FS2dMR2ZLSA==`
-      // Authorization: `Bearer ${VONAGE_JWT}`
-      // Authorization: toBase64(`${VONAGE_API_KEY}:${VONAGE_API_SECRET}`)
+      Authorization: `Basic ${AUTH_TOKEN}`,
     },
     json: {
       name: name,
-      capabilities: {
-        // messages: {
-        //   webhooks: {
-        //     inbound_url: {
-        //       address: "https://example.com/webhooks/inbound",
-        //       http_method: "POST"
-        //     },
-        //     status_url: {
-        //       address: "https://example.com/webhooks/status",
-        //       http_method: "POST"
-        //     }
-        //   }
-        // },
-      }
     }
   })
   return results
 }))
 
 router.get('/api/application', wrapAsync(async () => {
-  const results = await http.post('https://api.nexmo.com/v2/applications', {
+  const results = await http.get('https://api.nexmo.com/v2/applications', {
     headers: {
-      Authorization: `Bearer MzYyOTkzMjM6NWs5WjA2SW9FS2dMR2ZLSA==`
-      // Authorization: `Bearer ${VONAGE_JWT}`
-      // Authorization: toBase64(`${VONAGE_API_KEY}:${VONAGE_API_SECRET}`)
+      Authorization: `Basic ${AUTH_TOKEN}`
     }
   })
   return results
 }))
 
-router.post('/api/application/:VONAGE_APPLICATION_ID/put', wrapAsync(async (request) => {
-  const { VONAGE_APPLICATION_ID } = request.params
+router.post('/api/application/:appId/put', wrapAsync(async (request) => {
+  const { appId } = request.params
   const { name } = request.body
-  const results = await http.put(`https://api.nexmo.com/v2/applications/${VONAGE_APPLICATION_ID}`, {
+
+  if (!name) throw new Error('name is required')
+
+  const results = await http.put(`https://api.nexmo.com/v2/applications/${appId}`, {
     headers: {
-      Authorization: `Bearer MzYyOTkzMjM6NWs5WjA2SW9FS2dMR2ZLSA==`
-      // Authorization: `Bearer ${VONAGE_JWT}`
-      // Authorization: toBase64(`${VONAGE_API_KEY}:${VONAGE_API_SECRET}`)
+      Authorization: `Basic ${AUTH_TOKEN}`
     },
     json: {
       name: name,
-      capabilities: {
-        // messages: {
-        //   webhooks: {
-        //     inbound_url: {
-        //       address: "https://example.com/webhooks/inbound",
-        //       http_method: "POST"
-        //     },
-        //     status_url: {
-        //       address: "https://example.com/webhooks/status",
-        //       http_method: "POST"
-        //     }
-        //   }
-        // },
-      }
     }
   })
   return results
 }))
 
-router.post('/api/application/:VONAGE_APPLICATION_ID/delete', wrapAsync(async (request) => {
-  const { VONAGE_APPLICATION_ID } = request.params
-  const results = await http.delete(`https://api.nexmo.com/v2/applications/${VONAGE_APPLICATION_ID}`, {
+router.post('/api/application/:appId/delete', wrapAsync(async (request) => {
+  const { appId } = request.params
+  const results = await http.delete(`https://api.nexmo.com/v2/applications/${appId}`, {
     headers: {
-      Authorization: `Bearer MzYyOTkzMjM6NWs5WjA2SW9FS2dMR2ZLSA==`
-      // Authorization: `Bearer ${VONAGE_JWT}`
-      // Authorization: toBase64(`${VONAGE_API_KEY}:${VONAGE_API_SECRET}`)
+      Authorization: `Basic ${AUTH_TOKEN}`
     },
   })
   return results
@@ -99,10 +71,13 @@ router.post('/api/application/:VONAGE_APPLICATION_ID/delete', wrapAsync(async (r
 router.post('/api/message', wrapAsync(async (request, response) => {
   const {to, from, message} = request.body
 
-  const results = await http.post('https://messages-sandbox.nexmo.com/v0.1/messages', {
+  if (!to) throw new Error('to is required')
+  if (!from) throw new Error('from is required')
+  if (!message) throw new Error('message is required')
+
+  const results = await http.post('https://api.nexmo.com/v0.1/messages', {
     headers: {
-      Authorization: `Bearer MzYyOTkzMjM6NWs5WjA2SW9FS2dMR2ZLSA==`
-      // Authorization: `Bearer ${VONAGE_JWT}`
+      Authorization: `Basic ${AUTH_TOKEN}`
     },
     json: {
       from: { type: "sms", number: from },
@@ -115,6 +90,7 @@ router.post('/api/message', wrapAsync(async (request, response) => {
       }
     }
   })
+
   return results
 }))
 
