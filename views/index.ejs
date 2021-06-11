@@ -1,0 +1,51 @@
+<%- include('header'); -%>
+
+  <section class="mb-32">
+    <h2>Retrieve Account Balance</h2>
+    <!-- API and HTML interface to retrieve your account balance from the Vonage API -->
+    <form data-event="getBalance" action="/api/balance">
+      <button type="submit">Get Balance</button>
+    </form>
+  </section>
+  
+  <section class="mb-32">
+    <h2>Manage applications</h2>
+    <form data-event="createApp" action="/api/application" method="POST" class="mb-32">
+      <h4>Create</h4>
+      <div>
+        <label for="name">Name</label>
+        <input required>
+      </div>
+  
+      <button type="submit">Submit</button>
+    </form>
+
+    <form data-event="getApps" action="/api/application">
+      <h4>List of apps:</h4>
+      <button type="submit">Get apps</button>
+    </form>
+    <div id="applicationList"></div>
+  </section>
+
+  <section>
+    <h2>Send Text</h2>
+    <!-- API and HTML Interface for sending an SMS using the Vonage Messages API (not the legacy SMS API) The user should be able to submit a To, From, and Message option, and support sending emojis -->
+    <form action="/api/message" method="POST">
+      <div>
+        <label for="to">To:</label>
+        <input id="to" name="to" type="tel" required>
+      </div>
+      <div>
+        <label for="from">From:</label>
+        <input id="from" name="from" type="tel" required>
+      </div>
+      <div>
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+  
+      <button type="submit">Submit</button>
+    </form>
+  </section>
+
+<%- include('footer'); -%>
