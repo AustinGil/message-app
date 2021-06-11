@@ -6,7 +6,6 @@ async function updateAppList() {
   const results = await http.get('/api/application')
 
   const list = results._embedded.applications.map(app => {
-  // const list = [{ id: 1, name: 'ypo' }].map(app => {
     const { id, name } = app
     return `<li>
       <form data-form="editApp" action="/api/application/${id}/put" method="POST">
